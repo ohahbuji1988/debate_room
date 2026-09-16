@@ -4,25 +4,33 @@ import time
 import json
 import re
 import datetime
-from dotenv import load_dotenv
 
-# ----------------------------------------------------
-# 1. 환경 설정 & 세션 상태
-# ----------------------------------------------------
-load_dotenv()
-ENV_GROQ_KEY = os.getenv("GROQ_API_KEY", "")
-ENV_GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
+# Streamlit Cloud 및 로컬 환경 동시 호환 (에러 방지 처리)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# API Key 로드: Streamlit Secrets 우선, 없으면 os.environ에서 탐색
+ENV_GROQ_KEY = ""
+ENV_GEMINI_KEY = ""
+
+if hasattr(st, "secrets"):
+    ENV_GROQ_KEY = st.secrets.get("GROQ_API_KEY", "")
+    ENV_GEMINI_KEY = st.secrets.get("GEMINI_API_KEY", "")
+
+if not ENV_GROQ_KEY:
+    ENV_GROQ_KEY = os.getenv("GROQ_API_KEY", "")
+if not ENV_GEMINI_KEY:
+    ENV_GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
 
 st.set_page_config(
-    page_title="Debate Room Pro | Executive Decision Simulator",
+    page_title="디베이트 룸 프로 | 의사결정 시뮬레이터",
     page_icon="⌘",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# ----------------------------------------------------
-# 2. Apple 미학 CSS & 우측 완벽 고정 플로팅 타이머
-# ----------------------------------------------------
 st.markdown("""
 <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
